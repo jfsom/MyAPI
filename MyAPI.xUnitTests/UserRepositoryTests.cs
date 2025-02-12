@@ -13,38 +13,25 @@ namespace MyAPI.xUnitTests
             _userRepository = new UserRepository();
         }
 
-        // Test to verify that GetUserById returns the correct user
-        [Fact]
-        public void GetUserById_ReturnsCorrectUser()
+        // Combined test to verify that GetUserById returns the correct user or null if not found
+        [Theory]
+        [InlineData(1, true)]  // User with ID 1 exists
+        [InlineData(99, false)] // User with ID 99 does not exist
+        public void GetUserById_ReturnsExpectedResult(int userId, bool userExists)
         {
-            // Arrange
-            var userId = 1;
-
             // Act
             var result = _userRepository.GetUserById(userId);
 
             // Assert
-            // Check that result is not null
-            Assert.NotNull(result);
-
-            // Check that the ID of the returned user is correct
-            Assert.Equal(userId, result.Id);
-        }
-
-        // Test to verify that GetUserById returns null when the user is not found
-        [Fact]
-        public void GetUserById_ReturnsNullWhenUserNotFound()
-        {
-            // Arrange
-            // Assuming this ID does not exist
-            var userId = 99;
-
-            // Act
-            var result = _userRepository.GetUserById(userId);
-
-            // Assert
-            // Check that result is null
-            Assert.Null(result);
+            if (userExists)
+            {
+                Assert.NotNull(result);
+                Assert.Equal(userId, result.Id);
+            }
+            else
+            {
+                Assert.Null(result);
+            }
         }
 
         // Test to verify that GetAllUsers returns all users

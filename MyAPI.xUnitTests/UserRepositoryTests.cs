@@ -15,8 +15,7 @@ namespace MyAPI.xUnitTests
 
         // Combined test to verify that GetUserById returns the correct user or null if not found
         [Theory]
-        [InlineData(1, true)]  // User with ID 1 exists
-        [InlineData(99, false)] // User with ID 99 does not exist
+        [MemberData(nameof(GetUserByIdTestData))]
         public void GetUserById_ReturnsExpectedResult(int userId, bool userExists)
         {
             // Act
@@ -98,5 +97,13 @@ namespace MyAPI.xUnitTests
             // Assert
             Assert.Null(result); // Check that the user was deleted and cannot be found
         }
+
+        // Define the test data as a static property
+        public static IEnumerable<object[]> GetUserByIdTestData =>
+            new List<object[]>
+            {
+                new object[] { 1, true },
+                new object[] { 99, false }
+            };
     }
 }

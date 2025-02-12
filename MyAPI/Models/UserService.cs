@@ -9,34 +9,34 @@
             _userRepository = userRepository;
         }
 
-        public User GetUserById(int userId)
+        public async Task<User> GetUserByIdAsync(int userId)
         {
             //Any Business Logic
-            return _userRepository.GetUserById(userId);
+            return await _userRepository.GetUserByIdAsync(userId);
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             //Any Business Logic
-            return _userRepository.GetAllUsers();
+            return await _userRepository.GetAllUsersAsync();
         }
 
-        public void AddUser(User user)
+        public async Task AddUserAsync(User user)
         {
             //Any Business Logic
-            _userRepository.AddUser(user);
+            await _userRepository.AddUserAsync(user);
         }
 
-        public void UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
             //Any Business Logic
-            _userRepository.UpdateUser(user);
+            await _userRepository.UpdateUserAsync(user);
         }
 
-        public void DeleteUser(int userId)
+        public async Task DeleteUserAsync(int userId)
         {
             //Any Business Logic
-            _userRepository.DeleteUser(userId);
+            await _userRepository.DeleteUserAsync(userId);
         }
     }
 }

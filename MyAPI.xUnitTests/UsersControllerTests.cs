@@ -7,124 +7,120 @@ namespace MyAPI.xUnitTests
 {
     public class UsersControllerTests
     {
-        // Instance of the controller being tested
         private readonly UsersController _controller;
-
-        // Mock instance of the service
         private readonly Mock<IUserService> _mockService;
 
-        // Constructor to initialize mock service and the controller
         public UsersControllerTests()
         {
-            // Creating a mock object for IUserService
+            // Create a mock IUserService
             _mockService = new Mock<IUserService>();
-
-            // Injecting the mock object into the controller
+            // Inject the mock service into the controller
             _controller = new UsersController(_mockService.Object);
         }
 
-        // Test to verify that GetUserById returns an OkObjectResult with the correct user
         [Fact]
-        public void GetUser_ReturnsOkResultWithUser()
-        {
-            // Arrange
-            var userId = 1; // Define the user ID to retrieve
-            var expectedUser = new User { Id = 1, Name = "John Doe", Email = "john@example.com" }; // Define the expected user
-            _mockService.Setup(service => service.GetUserById(userId)).Returns(expectedUser); // Configure the mock service to return the expected user
-
-            // Act
-            var result = _controller.GetUserById(userId) as OkObjectResult; // Call the controller method and cast the result to OkObjectResult
-
-            // Assert
-            Assert.NotNull(result); // Check that the result is not null
-            Assert.Equal(200, result.StatusCode); // Check that the status code is 200 OK
-            Assert.Equal(expectedUser, result.Value); // Check that the returned value is the expected user
-        }
-
-        // Test to verify that GetUserById returns a NotFoundResult when the user is not found
-        [Fact]
-        public void GetUser_ReturnsNotFoundWhenUserNotFound()
-        {
-            // Arrange
-            var userId = 99; // Define a non-existent user ID
-            _mockService.Setup(service => service.GetUserById(userId)).Returns((User)null); // Configure the mock service to return null
-
-            // Act
-            var result = _controller.GetUserById(userId) as NotFoundResult; // Call the controller method and cast the result to NotFoundResult
-
-            // Assert
-            Assert.NotNull(result); // Check that the result is not null
-            Assert.Equal(404, result.StatusCode); // Check that the status code is 404 Not Found
-        }
-
-        // Test to verify that GetAllUsers returns an OkObjectResult with a list of users
-        [Fact]
-        public void GetAllUsers_ReturnsOkResultWithListOfUsers()
+        public async Task GetAllUsersAsync_ReturnsOkResultWithListOfUsers()
         {
             // Arrange
             var expectedUsers = new List<User>
             {
                 new User { Id = 1, Name = "John Doe", Email = "john@example.com" },
                 new User { Id = 2, Name = "Jane Smith", Email = "jane@example.com" }
-            }; // Define the expected list of users
-            _mockService.Setup(service => service.GetAllUsers()).Returns(expectedUsers); // Configure the mock service to return the expected list of users
+            };
+            _mockService.Setup(service => service.GetAllUsersAsync()).ReturnsAsync(expectedUsers);
 
             // Act
-            var result = _controller.GetAllUsers() as OkObjectResult; // Call the controller method and cast the result to OkObjectResult
+            var result = await _controller.GetAllUsersAsync() as OkObjectResult;
 
             // Assert
-            Assert.NotNull(result); // Check that the result is not null
-            Assert.Equal(200, result.StatusCode); // Check that the status code is 200 OK
-            Assert.Equal(expectedUsers, result.Value); // Check that the returned value is the expected list of users
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+            Assert.Equal(expectedUsers, result.Value);
         }
 
-        // Test to verify that AddUser returns a CreatedAtActionResult
-        [Fact]
-        public void AddUser_ReturnsCreatedAtAction()
+        [Theory]
+        [ClassData(typeof(GetUserByIdTestData))]
+        public async Task GetUserByIdAsync_ReturnsExpectedResult(int userId, bool userExists)
         {
             // Arrange
-            var newUser = new User { Id = 3, Name = "Sam Wilson", Email = "sam@example.com" }; // Define the new user to add
+            var expectedUser = userExists ? new User { Id = userId, Name = "Test User", Email = "test@example.com" } : null;
+            _mockService.Setup(service => service.GetUserByIdAsync(userId)).ReturnsAsync(expectedUser);
 
             // Act
-            var result = _controller.AddUser(newUser) as CreatedAtActionResult; // Call the controller method and cast the result to CreatedAtActionResult
+            var result = await _controller.GetUserByIdAsync(userId);
 
             // Assert
-            Assert.NotNull(result); // Check that the result is not null
-            Assert.Equal(201, result.StatusCode); // Check that the status code is 201 Created
-            Assert.Equal("GetUserById", result.ActionName); // Check that the action name is "GetUserById"
-            Assert.Equal(newUser.Id, ((User)result.Value).Id); // Check that the returned user ID is the new user's ID
+            if (userExists)
+            {
+                var okResult = Assert.IsType<OkObjectResult>(result);
+                Assert.NotNull(okResult.Value);
+                Assert.Equal(userId, ((User)okResult.Value).Id);
+            }
+            else
+            {
+                Assert.IsType<NotFoundResult>(result);
+            }
         }
 
-        // Test to verify that UpdateUser returns a NoContentResult
         [Fact]
-        public void UpdateUser_ReturnsNoContent()
+        public async Task AddUserAsync_ReturnsCreatedAtActionResult()
         {
             // Arrange
-            var updatedUser = new User { Id = 1, Name = "John Updated", Email = "john.updated@example.com" }; // Define the updated user
-            _mockService.Setup(service => service.UpdateUser(updatedUser)); // Configure the mock service to update the user
+            var newUser = new User { Id = 3, Name = "Sam Wilson", Email = "sam@example.com" };
+            _mockService.Setup(service => service.AddUserAsync(newUser)).Returns(Task.CompletedTask);
 
             // Act
-            var result = _controller.UpdateUser(1, updatedUser) as NoContentResult; // Call the controller method and cast the result to NoContentResult
+            var result = await _controller.AddUserAsync(newUser) as CreatedAtActionResult;
 
             // Assert
-            Assert.NotNull(result); // Check that the result is not null
-            Assert.Equal(204, result.StatusCode); // Check that the status code is 204 No Content
+            Assert.NotNull(result);
+            Assert.Equal(201, result.StatusCode);
+            Assert.Equal("GetUserByIdAsync", result.ActionName);
+            Assert.Equal(newUser.Id, ((User)result.Value).Id);
         }
 
-        // Test to verify that DeleteUser returns a NoContentResult
         [Fact]
-        public void DeleteUser_ReturnsNoContent()
+        public async Task UpdateUserAsync_ReturnsNoContent()
         {
             // Arrange
-            var userId = 1; // Define the user ID to delete
-            _mockService.Setup(service => service.DeleteUser(userId)); // Configure the mock service to delete the user
+            var updatedUser = new User { Id = 1, Name = "John Updated", Email = "john.updated@example.com" };
+            _mockService.Setup(service => service.UpdateUserAsync(updatedUser)).Returns(Task.CompletedTask);
 
             // Act
-            var result = _controller.DeleteUser(userId) as NoContentResult; // Call the controller method and cast the result to NoContentResult
+            var result = await _controller.UpdateUserAsync(1, updatedUser) as NoContentResult;
 
             // Assert
-            Assert.NotNull(result); // Check that the result is not null
-            Assert.Equal(204, result.StatusCode); // Check that the status code is 204 No Content
+            Assert.NotNull(result);
+            Assert.Equal(204, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ReturnsBadRequest_WhenIdMismatch()
+        {
+            // Arrange
+            var updatedUser = new User { Id = 2, Name = "John Updated", Email = "john.updated@example.com" };
+
+            // Act
+            var result = await _controller.UpdateUserAsync(1, updatedUser) as BadRequestResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ReturnsNoContent()
+        {
+            // Arrange
+            var userId = 1;
+            _mockService.Setup(service => service.DeleteUserAsync(userId)).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.DeleteUserAsync(userId) as NoContentResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(204, result.StatusCode);
         }
     }
 }

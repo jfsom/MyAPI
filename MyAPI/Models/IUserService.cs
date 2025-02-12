@@ -2,10 +2,10 @@
 {
     public interface IUserService
     {
-        User GetUserById(int userId);
-        IEnumerable<User> GetAllUsers();
-        void AddUser(User user);
-        void UpdateUser(User user);
-        void DeleteUser(int userId);
+        Task<User> GetUserByIdAsync(int userId);
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task AddUserAsync(User user);
+        Task UpdateUserAsync(User user);
+        Task DeleteUserAsync(int userId);
     }
 }

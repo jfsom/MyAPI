@@ -14,24 +14,32 @@
             };
         }
 
-        public User GetUserById(int userId)
+        public async Task<User> GetUserByIdAsync(int userId)
         {
+            //Simulate the async operation using Task.Delay
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
             return _users.FirstOrDefault(u => u.Id == userId);
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
+            //Simulate the async operation using Task.Delay
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
             return _users;
         }
 
-        public void AddUser(User user)
+        public async Task AddUserAsync(User user)
         {
+            //Simulate the async operation using Task.Delay
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
             _users.Add(user);
         }
 
-        public void UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
-            var existingUser = GetUserById(user.Id);
+            //Simulate the async operation using Task.Delay
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            var existingUser = await GetUserByIdAsync(user.Id);
             if (existingUser != null)
             {
                 existingUser.Name = user.Name;
@@ -39,9 +47,11 @@
             }
         }
 
-        public void DeleteUser(int userId)
+        public async Task DeleteUserAsync(int userId)
         {
-            var user = GetUserById(userId);
+            //Simulate the async operation using Task.Delay
+            await Task.Delay(TimeSpan.FromMilliseconds(1));
+            var user = await GetUserByIdAsync(userId);
             if (user != null)
             {
                 _users.Remove(user);

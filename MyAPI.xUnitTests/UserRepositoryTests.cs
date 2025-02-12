@@ -1,6 +1,4 @@
-﻿// Importing the Models namespace which likely contains the UserRepository and User classes
-using MyAPI.Models;
-
+﻿using MyAPI.Models;
 namespace MyAPI.xUnitTests
 {
     public class UserRepositoryTests
@@ -15,7 +13,7 @@ namespace MyAPI.xUnitTests
 
         // Combined test to verify that GetUserById returns the correct user or null if not found
         [Theory]
-        [MemberData(nameof(GetUserByIdTestData))]
+        [ClassData(typeof(GetUserByIdTestData))]
         public void GetUserById_ReturnsExpectedResult(int userId, bool userExists)
         {
             // Act
@@ -97,13 +95,5 @@ namespace MyAPI.xUnitTests
             // Assert
             Assert.Null(result); // Check that the user was deleted and cannot be found
         }
-
-        // Define the test data as a static property
-        public static IEnumerable<object[]> GetUserByIdTestData =>
-            new List<object[]>
-            {
-                new object[] { 1, true },
-                new object[] { 99, false }
-            };
     }
 }
